@@ -1,0 +1,37 @@
+{
+  "name": "@kaenjs/angular",
+  "version": "0.0.0",
+  "description": "Angular Router for KaenJS",
+  "main": "index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "keywords": [
+    "Angular",
+    "Middleware",
+    "KaenJS",
+    "Framework",
+    "kaen",
+    "backend",
+    "webserver",
+    "nodejs"
+  ],
+  "author": "Gerardo Pérez Pérez <gerard2perez@outlook.com>",
+  "license": "AGPL-3.0",
+  "devDependencies": {
+    "@kaenjs/core": "file:../core",
+    "@kaenjs/router": "file:../router",
+    "@types/node": "^10.0.0",
+    "typescript": "^3.4.3"
+  },
+  "dependencies": {},
+  "engines": {
+    "node": ">=10.0.0"
+  },
+  "files": [
+    "**/*.js",
+    "package.json",
+    "**/*.d.ts"
+  ],
+  "readme": "README.md"
+}
