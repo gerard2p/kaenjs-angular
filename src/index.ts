@@ -1,28 +1,31 @@
-import { KaenContext } from "@kaenjs/core";
+import { KaenContext, HTTPVerbs } from "@kaenjs/core";
 import { targetPathNoSrc } from "@kaenjs/core/utils";
-import { Router } from "@kaenjs/router";
-import { existsSync, readFile } from "fs";
+import { Router, RouterModel, ROUTE } from "@kaenjs/router";
+import { existsSync, readFile, statSync, createReadStream } from "fs";
+import { MimeType } from "@kaenjs/core/mime-types";
+import { extname } from "path";
 function send(target:string) {
-	return new Promise(resolve=>{
-		readFile(target,{encoding: 'utf-8'}, (err, data)=>{
-			resolve(data);
-		});
-	});
+	return createReadStream(target);
 }
-export class AngularRouter {
-	constructor(private name:string, private router:Router) {
-		router.get('/assets/.*', this.assets.bind(this));
-		router.get('/.*', this.index.bind(this));
-	}
-	async assets (ctx:KaenContext) {
-		let target;
-		target = ctx.url.path.replace('/assets', `apps/${this.name}`);
-		if(!existsSync( targetPathNoSrc(target))) {
-			target = ctx.url.path.replace('/assets', `apps/${this.name}/assets`);
+export class AngularModel extends RouterModel {
+	name:string = 'angular-app'
+	path:string = 'public'
+	@ROUTE(HTTPVerbs.get, '/.*') async index(ctx:KaenContext) {
+		let file = targetPathNoSrc(this.path, this.name, ctx.url.path);
+		if(existsSync(file) && statSync(file).isFile()) {
+			ctx.body = await send(file);
+			ctx.type = MimeType[extname(file)]
+		} else {
+			ctx.body = await send(targetPathNoSrc(`${this.path}/${this.name}/index.html`));
+			ctx.type = MimeType[".html"];
 		}
-		ctx.body = await send(target);
 	}
-	async index(ctx:KaenContext) {
-		ctx.body = await send(targetPathNoSrc(`apps/${this.name}/index.html`));
+	@ROUTE(HTTPVerbs.get, '/assets/.*') async assets (ctx:KaenContext) {
+		let file = targetPathNoSrc(this.path, this.name, ctx.url.path);
+		if(!existsSync(  file)) {
+			file = ctx.url.path.replace('/assets', `${this.path}/${this.name}/assets`);
+		}
+		ctx.body = await send(file);
+		ctx.type = MimeType[extname(file)]
 	}
 }
